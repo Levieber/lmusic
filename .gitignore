@@ -19,6 +19,8 @@ dist
 # misc
 .DS_Store
 *.pem
+*/musics/*
+!*/musics/.gitkeep
 
 # debug
 npm-debug.log*
