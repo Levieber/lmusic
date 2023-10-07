@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
 import NextIcon from "./icons/NextIcon";
 import PauseIcon from "./icons/PauseIcon";
 import PlayIcon from "./icons/PlayIcon";
@@ -29,7 +29,7 @@ export default function MusicControls() {
         }
       }
     );
-  }, [musicPlaylist]);
+  }, []);
 
   useEffect(() => {
     const handleMusicLoaded = () => {
@@ -84,10 +84,73 @@ export default function MusicControls() {
     }
   }
 
+  useEffect(() => {
+    window.electronApi.ReceiveFromElectron("music-deleted", () => {
+      setMusicIndex((currentIndex) => {
+        if (audioRef.current && currentIndex <= musicPlaylist.length - 1) {
+          setMusic(`/musics/${musicPlaylist[currentIndex + 1]}`);
+          audioRef.current.load();
+          audioRef.current.play();
+          setCurrentTime(audioRef.current.currentTime);
+          setMusicPlaylist((currentPlaylist) =>
+            currentPlaylist.filter(
+              (music) => music !== currentPlaylist[currentIndex - 1]
+            )
+          );
+          return currentIndex + 1;
+        }
+
+        setMusic(undefined);
+        return currentIndex;
+      });
+    });
+  }, [musicPlaylist]);
+
+  function handleProgressbarClick(event: MouseEvent<HTMLProgressElement>) {
+    if (audioRef.current) {
+      const progressbar = event.currentTarget;
+
+      const clickPosition = event.nativeEvent.offsetX;
+      const progressbarTotalWidth = progressbar.clientWidth;
+      const time =
+        audioRef.current.duration * (clickPosition / progressbarTotalWidth);
+      audioRef.current.currentTime = time;
+      progressbar.value = (time / audioRef.current.duration) * 100;
+    }
+  }
+
+  function handleNextMusic() {
+    if (audioRef.current && musicIndex < musicPlaylist.length - 1) {
+      setMusicIndex((currentIndex) => currentIndex + 1);
+      setMusic(`/musics/${musicPlaylist[musicIndex + 1]}`);
+      audioRef.current.load();
+      audioRef.current.play();
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  }
+
+  function handlePreviousMusic() {
+    if (musicPlaylist.length === 0) return;
+
+    if (audioRef.current && musicIndex > 0) {
+      setMusicIndex((currentIndex) => currentIndex - 1);
+      const previousMusic = musicPlaylist[musicIndex - 1];
+
+      if (previousMusic) {
+        setMusic(`/musics/${previousMusic}`);
+        audioRef.current.load();
+        audioRef.current.play();
+        setCurrentTime(audioRef.current.currentTime);
+      } else {
+        console.error("A música anterior não existe mais.");
+      }
+    }
+  }
+
   return (
     <div className="grow w-96 h-14 px-8 flex-col justify-center items-center gap-4 inline-flex">
       <div className="justify-center items-center gap-8 inline-flex">
-        <button>
+        <button onClick={handlePreviousMusic}>
           <PreviousIcon />
         </button>
 
@@ -101,12 +164,12 @@ export default function MusicControls() {
           </button>
         )}
 
-        <button>
+        <button onClick={handleNextMusic}>
           <NextIcon />
         </button>
       </div>
 
-      <audio ref={audioRef}>
+      <audio ref={audioRef} onEnded={handleNextMusic}>
         <source src={music} type="audio/mp3" />
       </audio>
 
@@ -116,8 +179,13 @@ export default function MusicControls() {
         </p>
 
         <progress
+          onClick={handleProgressbarClick}
           max={100}
-          value={duration > 0 ? (currentTime / duration) * 100 : 0}
+          value={
+            audioRef.current?.duration && audioRef.current.duration > 0
+              ? (audioRef.current.currentTime / audioRef.current.duration) * 100
+              : 0
+          }
           className="[&::-webkit-progress-bar]:bg-zinc-700 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-blue-300 w-96  h-4 border-none"
         />
 

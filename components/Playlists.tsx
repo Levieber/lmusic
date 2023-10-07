@@ -7,9 +7,7 @@ export default function Playlists({ isOpen }: { isOpen: boolean }) {
     window.electronApi.ReceiveFromElectron(
       "music-playable",
       (_event, music) => {
-        setMusicPlaylist((playlist) =>
-          !playlist.includes(music) ? [...playlist, music] : playlist
-        );
+        setMusicPlaylist((playlist) => [...playlist, music]);
       }
     );
 
@@ -21,20 +19,20 @@ export default function Playlists({ isOpen }: { isOpen: boolean }) {
         );
       }
     );
-  }, [musicPlaylist]);
+  }, []);
 
   return (
     <aside
       style={{ transform: isOpen ? "translateX(0%)" : "translateX(100%)" }}
-      className="absolute right-0 w-96 h-[calc(100vh_-_7rem)] transition-transform flex flex-col items-center bg-zinc-800 overflow-y-auto scrollbar-thin scrollbar-track-zinc-700 scrollbar-thumb-blue-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full"
+      className="absolute right-0 w-96 h-[calc(100vh_-_7rem)] transition-transform flex flex-col items-center bg-zinc-800 overflow-y-auto"
     >
       <h2 className="p-10 text-3xl font-bold">Playlist:</h2>
       {musicPlaylist.length === 0 ? (
         <p className="text-xl text-zinc-400">Vazio</p>
       ) : (
         <ul className="list-disc">
-          {musicPlaylist.map((music) => (
-            <li className="text-lg" key={music}>
+          {musicPlaylist.map((music, index) => (
+            <li className="text-lg" key={`${music}-${index}`}>
               {music}
             </li>
           ))}
