@@ -23,10 +23,10 @@ export default function MenuList() {
   }, []);
 
   return (
-    <section className="w-11/12 ml-5">
+    <section className="w-11/12 ml-5  h-[calc(100vh_-_10.5rem)] overflow-y-auto p-2">
       <h2 className="text-2xl">Lista de Músicas</h2>
       {musicList.length > 0 ? (
-        <ul className="mt-5 flex flex-col gap-5 overflow-y-auto">
+        <ul className="mt-5 flex flex-col gap-5">
           {musicList.map((music) => (
             <li key={music}>
               <MusicItem music={music} />

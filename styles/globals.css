@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  * {
+    @apply scrollbar-thin scrollbar-track-zinc-700 scrollbar-thumb-blue-400 scrollbar-track-rounded-full scrollbar-thumb-rounded-full;
+    scroll-margin: 1rem;
+  }
+}
